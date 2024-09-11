@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
+  "version": "0.1.0",
   "name": "UoW Files Downloader",
   "description": "Download files from UoW Student Portal",
-  "background": { "service_worker": "background.js" },
+  "background": { "service_worker": "assets/background.js" },
   "action": {
     "default_popup": "index.html",
     "default_icon": "icon-34.png"
@@ -14,13 +15,12 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"]
+      "js": ["assets/content.js"]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["content.css", "icon-128.png", "icon-34.png"],
+      "resources": ["icon-128.png", "icon-34.png"],
       "matches": []
     }
   ]

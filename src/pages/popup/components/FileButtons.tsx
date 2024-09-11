@@ -5,8 +5,7 @@ type FileButtonsProps = object;
 
 const FileButtons: React.FC<FileButtonsProps> = () => {
   const handleButtonClick = (fileType: string) => {
-    console.log('Button clicked:', fileType);
-    sendMessageToTab('downloadFile', (response) => {
+    sendMessageToTab(`downloadFile:${fileType}`, (response) => {
       openNewTab('https://student.westminster.ac.uk' + response.url);
     });
   };

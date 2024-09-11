@@ -1,7 +1,13 @@
 {
   "name": "uow-files-downloader",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "A Chrome extension to download files from UOW student portal.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarvarbek-abdullaev/uow-files-downloader"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

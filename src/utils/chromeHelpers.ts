@@ -9,7 +9,7 @@ export const openUrl = (url: string) => {
 };
 
 export const openNewTab = (url: string) => {
-  chrome.tabs.create({ url });
+  chrome.tabs.create({ url, active: false });
 };
 
 export const sendMessageToTab = (

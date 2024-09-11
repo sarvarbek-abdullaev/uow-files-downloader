@@ -1,35 +1,63 @@
-import { useState } from 'react';
-import reactLogo from '../../assets/react.svg';
-import viteLogo from '/vite.svg';
-import './Popup.css';
+import React, { useEffect, useState } from 'react';
+import { openUrl, getCurrentTabUrl } from '../../utils/chromeHelpers';
+import { fetchUserName } from '../../utils/userHelpers';
+import Header from './components/Header';
+import FileButtons from './components/FileButtons';
+import './popup.css';
 
-function Popup() {
-  const [count, setCount] = useState(0);
+const Popup: React.FC = () => {
+  const [userName, setUserName] = useState<string | null>(null);
+  const [windowUrl, setWindowUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUserName(setUserName);
+  }, []);
+
+  useEffect(() => {
+    if (userName) {
+      getCurrentTabUrl(setWindowUrl);
+    }
+  }, [userName]);
+
+  // Handle Document page navigation
+  const handleLinkClick = (e: React.MouseEvent, newUrl: string) => {
+    e.preventDefault();
+    openUrl(newUrl);
+  };
+
+  // Render login message if no username is found
+  if (!userName) {
+    return (
+      <div>
+        <h1>Please log in to use the extension</h1>
+      </div>
+    );
+  }
+
+  // Render prompt to navigate to Documents page if not already there
+  if (windowUrl !== 'https://student.westminster.ac.uk/Documents') {
+    return (
+      <div>
+        Open or click on the{' '}
+        <button
+          onClick={(e) =>
+            handleLinkClick(e, 'https://student.westminster.ac.uk/Documents')
+          }
+        >
+          Documents
+        </button>{' '}
+        page to use the extension
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <Header userName={userName} />
+      <p>Click the button to download the file you want. </p>
+      <FileButtons />
+    </div>
   );
-}
+};
 
 export default Popup;

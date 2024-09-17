@@ -1,61 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { openUrl, getCurrentTabUrl } from '../../utils/chromeHelpers';
-import { fetchUserName } from '../../utils/userHelpers';
-import Header from './components/Header';
-import FileButtons from './components/FileButtons';
+import React, { useCallback, useEffect, useState } from 'react';
 import './popup.css';
 
 const Popup: React.FC = () => {
   const [userName, setUserName] = useState<string | null>(null);
-  const [windowUrl, setWindowUrl] = useState<string | null>(null);
+  const [mounted, setMounted] = useState<boolean>(false);
 
-  useEffect(() => {
-    fetchUserName(setUserName);
+  const fetchLoginStatus = useCallback(() => {
+    chrome.runtime.sendMessage({ type: 'CHECK_LOGIN_STATUS' }, (response) => {
+      setUserName(response?.userName || null);
+      setMounted(true);
+    });
   }, []);
 
+  // UseEffect to fetch login status when the popup loads
   useEffect(() => {
-    if (userName) {
-      getCurrentTabUrl(setWindowUrl);
-    }
-  }, [userName]);
+    fetchLoginStatus();
+  }, []);
 
-  // Handle Document page navigation
-  const handleLinkClick = (e: React.MouseEvent, newUrl: string) => {
-    e.preventDefault();
-    openUrl(newUrl);
-  };
-
-  // Render login message if no username is found
-  if (!userName) {
+  if (!mounted) {
     return (
-      <div>
-        <h1>Please log in to use the extension</h1>
-      </div>
-    );
-  }
-
-  // Render prompt to navigate to Documents page if not already there
-  if (windowUrl !== 'https://student.westminster.ac.uk/Documents') {
-    return (
-      <div>
-        Open or click on the{' '}
-        <button
-          onClick={(e) =>
-            handleLinkClick(e, 'https://student.westminster.ac.uk/Documents')
-          }
-        >
-          Documents
-        </button>{' '}
-        page to use the extension
+      <div className="popup">
+        <h1>Loading your login status...</h1>
       </div>
     );
   }
 
   return (
-    <div>
-      <Header userName={userName} />
-      <p>Click the button to download the file you want. </p>
-      <FileButtons />
+    <div className="popup">
+      {!userName ? (
+        <div className="login-message">
+          <h1>Please log in to use the extension</h1>
+        </div>
+      ) : (
+        <div className="logged-in-content">
+          <h1>Welcome, {userName}!</h1>
+          <p>Click the button to download the file you want.</p>
+          <button className="file-button">Download File</button>
+        </div>
+      )}
     </div>
   );
 };

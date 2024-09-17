@@ -9,13 +9,12 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs.sendMessage(
         tabs[0].id!,
-        { type: 'REQUEST_LOGIN_STATUS' },
+        { type: 'CHECK_LOGIN_STATUS' },
         (response) => {
           sendResponse(response);
         }
       );
     });
-    // Need to return true to indicate async response
     return true;
   }
 });

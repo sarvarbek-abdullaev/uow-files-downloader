@@ -12,6 +12,13 @@ const Popup: React.FC = () => {
     });
   }, []);
 
+  const onDownloadFile = useCallback(() => {
+    if (!userName) return;
+    chrome.runtime.sendMessage({ type: 'GET_DOCUMENTS' }, (response) => {
+      console.log('Download file response:', response);
+    });
+  }, [userName]);
+
   // UseEffect to fetch login status when the popup loads
   useEffect(() => {
     fetchLoginStatus();
@@ -35,7 +42,9 @@ const Popup: React.FC = () => {
         <div className="logged-in-content">
           <h1>Welcome, {userName}!</h1>
           <p>Click the button to download the file you want.</p>
-          <button className="file-button">Download File</button>
+          <button onClick={onDownloadFile} className="file-button">
+            Download File
+          </button>
         </div>
       )}
     </div>

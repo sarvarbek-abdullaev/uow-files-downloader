@@ -3,7 +3,7 @@ interface ILoginStatus {
 }
 
 interface IGetDocuments {
-  documentIds: string[];
+  documents: any[];
 }
 
 async function getDocumentIds(): Promise<string[]> {
@@ -55,10 +55,18 @@ const handleGetDocuments = async (
 ) => {
   try {
     const documentIds = await getDocumentIds();
-    sendResponse({ documentIds });
+
+    if (!documentIds.length) {
+      sendResponse({ documents: [] });
+      return;
+    }
+
+    const documents = await getFiles(documentIds);
+
+    sendResponse({ documents });
   } catch (error) {
     console.error('Error fetching documents:', error);
-    sendResponse({ documentIds: [] }); // Send an empty response if there's an error
+    sendResponse({ documents: [] });
   }
 };
 
@@ -67,8 +75,8 @@ const handleGetDocumentId = async (
   id: string
 ) => {
   try {
-    const document = await getDocumentId(id);
-    sendResponse({ document });
+    const documentId = await getDocumentId(id);
+    sendResponse({ documentId });
   } catch (error) {
     console.error('Error fetching document:', error);
     sendResponse(null);
@@ -77,7 +85,14 @@ const handleGetDocumentId = async (
 
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   if (message.type === 'CHECK_LOGIN_STATUS') {
-    // Call checkLoginStatus and use the return value to send response
+    // Handle login status check
     handleLoginStatus(sendResponse);
+  } else if (message.type === 'GET_DOCUMENTS') {
+    // Fetch document IDs
+    handleGetDocuments(sendResponse);
+  } else if (message.type === 'GET_DOCUMENT_BY_ID') {
+    // Fetch a specific document by its ID
+    handleGetDocumentId(sendResponse, message.id);
   }
+  return true; // Ensure async response
 });

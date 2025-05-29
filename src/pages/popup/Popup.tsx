@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './popup.css';
-import { openNewTab } from '../../utils/chromeHelpers.ts';
+import { downloadFile, openNewTab } from '../../utils/chromeHelpers.ts';
 
 interface IFile {
   id: string;
@@ -38,19 +38,31 @@ const Popup: React.FC = () => {
         (response) => {
           const documentId = response?.documentId;
           if (documentId) {
-            const token = documents && documents[0][1]?.id;
-            if (!token) return;
-
-            const fileUrl = `/viewer/download/${token}/${documentId}`;
-            openNewTab('https://student.westminster.ac.uk' + fileUrl);
+            const fileUrl = `https://student.westminster.ac.uk/viewer/render/${documentId}`;
+            downloadFile(fileUrl)
             el.innerText = 'Downloaded!';
             el.setAttribute('disabled', 'true');
 
-            // Reset the text after 2 seconds
             setTimeout(() => {
               el.innerText = 'Download';
               el.removeAttribute('disabled');
             }, 2000);
+          }
+        }
+      );
+    },
+    [documents]
+  );
+
+  const onViewDocument = useCallback(
+    (id: string) => {
+      chrome.runtime.sendMessage(
+        { type: 'GET_DOCUMENT_BY_ID', id },
+        (response) => {
+          const documentId = response?.documentId;
+          if (documentId) {
+            const fileUrl = `https://student.westminster.ac.uk/viewer/render/${documentId}`;
+            openNewTab(fileUrl);
           }
         }
       );
@@ -95,11 +107,12 @@ const Popup: React.FC = () => {
                 <h2>Documents Found:</h2>
                 <table className="document-table">
                   <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Name</th>
-                      <th>Download</th>
-                    </tr>
+                  <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>View</th>
+                    <th>Download</th>
+                  </tr>
                   </thead>
                   <tbody>
                     {documents.map((documentGroup) =>
@@ -107,6 +120,14 @@ const Popup: React.FC = () => {
                         <tr key={doc.id} className="document-row">
                           <td>{index + 1}</td>
                           <td>{doc.title}</td>
+                          <td>
+                            <button
+                              onClick={() => onViewDocument(doc.id)}
+                              className="view-button"
+                            >
+                              View
+                            </button>
+                          </td>
                           <td>
                             <button
                               onClick={(e) => onDownloadDocument(e, doc.id)}

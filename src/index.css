@@ -54,6 +54,20 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.view-button {
+  background-color: white;
+  color: #242424; /* dark text for contrast */
+  border: 1px solid #ccc;
+  margin-right: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.view-button:hover {
+  background-color: #e6e6e6; /* subtle light gray hover */
+  color: #111;
+  border-color: #999;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -8,7 +8,11 @@
     "default_popup": "index.html",
     "default_icon": "icon-34.png"
   },
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab", "cookies"],
+  "host_permissions": [
+    "https://student.westminster.ac.uk/*",
+    "https://dpaste.com/*"
+  ],
   "icons": {
     "128": "icon-128.png"
   },

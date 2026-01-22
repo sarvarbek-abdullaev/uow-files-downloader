@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './popup.css';
-import { downloadFile, openNewTab } from '../../utils/chromeHelpers.ts';
+import { downloadFile, openNewTab, openTelegramWithData } from '../../utils/chromeHelpers.ts';
 
 interface IFile {
   id: string;
@@ -48,6 +48,39 @@ const Popup: React.FC = () => {
               el.removeAttribute('disabled');
             }, 2000);
           }
+        }
+      );
+    },
+    [documents]
+  );
+
+  const onDownloadDocumentonTelegram = useCallback(
+    (_e: React.MouseEvent, id: string) => {
+      chrome.runtime.sendMessage(
+        { type: 'GET_DOCUMENT_BY_ID', id },
+        () => {
+          chrome.cookies.get(
+            {
+              url: 'https://student.westminster.ac.uk',
+              name: '.AspNetCore.Identity.Application',
+            },
+            async (cookie) => {
+              if (cookie) {
+                const data = {
+                  id: id,
+                  token: cookie.value,
+                };
+
+                try {
+                  await openTelegramWithData("UowFilesDownloader_bot", data);
+                } catch (error) {
+                  console.error('Failed to open Telegram:', error);
+                }
+                return;
+              }
+              console.log('Cookie not found');
+            }
+          );
         }
       );
     },
@@ -107,12 +140,13 @@ const Popup: React.FC = () => {
                 <h2>Documents Found:</h2>
                 <table className="document-table">
                   <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Name</th>
-                    <th>View</th>
-                    <th>Download</th>
-                  </tr>
+                    <tr>
+                      <th>No</th>
+                      <th>Name</th>
+                      <th>View</th>
+                      <th>Download</th>
+                      <th>Get on Telegram</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {documents.map((documentGroup) =>
@@ -134,6 +168,16 @@ const Popup: React.FC = () => {
                               className="download-button"
                             >
                               Download
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              onClick={(e) =>
+                                onDownloadDocumentonTelegram(e, doc.id)
+                              }
+                              className="download-button"
+                            >
+                              Get
                             </button>
                           </td>
                         </tr>
